@@ -87,11 +87,7 @@ function updateSentence(){
 
 		var indexToRemove = _.random(0, currentWords.length-1);
         console.log('- ['+indexToRemove+']')
-		for (var i = 0,j=currentWords.length; i < j; i++) {
-			if(i!==indexToRemove){
-				nextWords.push(currentWords.shift());
-			}
-		}
+        nextWords = currentWords.filter((w,i) => i!==indexToRemove)
 
 	}
 	currentWords = nextWords;
