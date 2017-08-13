@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Twitter poem</title>
-	<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Twitter Poem</title>
+    <link href="https://fonts.googleapis.com/css?family=Martel+Sans:900" rel="stylesheet">
+    <style>
 html,body{margin:0;padding:0;height: 100%;}
 .app-out{
 	position: absolute;
@@ -30,31 +33,34 @@ html,body{margin:0;padding:0;height: 100%;}
 .app{}
 .text{
 	text-align: center;
-	font-size: 20vh;
+	font-size: 18vh;
+    font-family: 'Martel Sans', sans-serif;
 	margin: 1em;
+	padding-top: 4.7vh;
 	color:#FFF;
-	line-height: 0.9;
-	text-shadow:1px 1px 8px #000;
+	line-height: 1.2;
+	text-shadow:1px 1px 8px rgba(0,0,0,0.4);
+
 }
 .text > span{
 	position: relative;
-	transition:color 0.5 ease;
+
 }
 	</style>
 </head>
 <body>
-	<div class="debug"></div>
-	<div class="app-out app-out-1">
+    <!-- <div class="debug"></div> -->
+    <div class="app-out app-out-1">
 		<div class="app"></div>
 	</div>
 	<div class="app-out app-out-2">
 		<div class="app"></div>
 	</div>
-	<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-	<script src="/socket.io/socket.io.js"></script>
-	<!--<script src="node_modules/flickrapi/browser/flickrapi.dev.js"></script>-->
-	<script src="/jquery.color.js"></script>
-	<script>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+
+    <script src="js/velocity.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
 /*
 
 var flickr = new Flickr({
@@ -63,10 +69,11 @@ var flickr = new Flickr({
 /*
 */
 function debug(m){
-	$('.debug').append('<div>'+m+'</div>')
+	//$('.debug').append('<div>'+m+'</div>')
 }
 
 debug('start')
+
 
 var prevApp = 2;
 
@@ -103,9 +110,13 @@ function spanWithText($spans, text){
 	});
 	return found;
 }
-
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
 function randomColor(){
-	return 'rgb('+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+')';
+	//return 'rgb('+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+')';
+    return "#" + componentToHex(Math.round(Math.random()*255)) + componentToHex(Math.round(Math.random()*255)) + componentToHex(Math.round(Math.random()*255));
 }
 
 
@@ -118,8 +129,7 @@ var prevSentence = '';
 var $prevWords = makeWords(prevSentence);
 $prevWords.css('opacity', 1);
 
-//console.log($(prevWords[0]).offset());
-//console.log($(prevWords[1]).offset());
+
 if(io){
 	debug('io')
 	var socket = io();
@@ -131,10 +141,20 @@ if(io){
 	}, 5000)
 }
 
-
 function onResp(resp){
+    debug(resp.sentence)
+    onRespOri(resp);
+}
+
+function onRespOri(resp){
 
 	if(resp && resp.sentence){
+
+        if(resp.sentence.split(' ').length===1){
+            setTimeout(function(){
+                $('.app-out-1').velocity({'background-color': randomColor()}, 1500);
+            }, 1200);
+        }
 
 		$newWords = makeWords(resp.sentence);
 
@@ -158,10 +178,10 @@ function onResp(resp){
 				if($newSpan){
 				//	console.log($newSpan.offset());
 
-					$(this).animate({
+					$(this).velocity({
 						top: $newSpan[0].ofs.top,
 						left: $newSpan[0].ofs.left,
-						color: nextColor
+						//color: nextColor
 					}, 1000, 'swing');
 					$newSpan[0].isThere = true;
 				}else{
@@ -173,16 +193,17 @@ function onResp(resp){
 			});
 
 			i=0;
-			$newWords.css('color',nextColor).each(function(){
+			//$newWords.css('color',nextColor).each(function(){
+			$newWords.each(function(){
 				if(!this.isThere){
 					$(this).fadeTo(1000, 1);
 				}
 				i++;
 			});
 
-			$('.app-out-1').animate({
+			/*$('.app-out-1').velocity({
 				backgroundColor: randomColor()
-			}, 1500 );
+			}, 1500 );*/
 
 			setTimeout(function(){
 
@@ -228,6 +249,6 @@ function onResp(resp){
 
 
 }
-	</script>
+</script>
 </body>
 </html>
