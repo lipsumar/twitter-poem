@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Twitter poem</title>
+	<style>
+html,body{margin:0;padding:0;height: 100%;}
+.app-out{
+	position: absolute;
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	background-size: cover;
+
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+.debug{
+	position: absolute;
+	top:0;
+	left:0;
+	z-index:99999;
+	background: #FFF;
+	width:30%;
+	bottom:0;
+}
+/*.app-out-1 .text{color:green;}*/
+.app{}
+.text{
+	text-align: center;
+	font-size: 20vh;
+	margin: 1em;
+	color:#FFF;
+	line-height: 0.9;
+	text-shadow:1px 1px 8px #000;
+}
+.text > span{
+	position: relative;
+	transition:color 0.5 ease;
+}
+	</style>
+</head>
+<body>
+	<div class="debug"></div>
+	<div class="app-out app-out-1">
+		<div class="app"></div>
+	</div>
+	<div class="app-out app-out-2">
+		<div class="app"></div>
+	</div>
+	<script src="node_modules/jquery/dist/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<!--<script src="node_modules/flickrapi/browser/flickrapi.dev.js"></script>-->
+	<script src="node_modules/jquery-color/jquery.color.js"></script>
+	<script>
+/*
+
+var flickr = new Flickr({
+  api_key: "06e46088e036e2ae2d49075512b55e15"
+});
+/*
+*/
+function debug(m){
+	$('.debug').append('<div>'+m+'</div>')
+}
+
+debug('start')
+
+var prevApp = 2;
+
+function makeWords(sentence){
+	var app = prevApp===2 ? 1 : 2;
+	var html=[];
+	var words = sentence.split(' ');
+	for (var i = 0; i < words.length; i++) {
+		html.push('<span style="opacity:0">'+words[i]+'</span>');
+	}
+	var $text = $('<div class="text">'+html.join(' ')+'</div>');
+	$('.app-out-'+app+' .app').empty().append($text);
+
+	prevApp = app;
+	var $spans = $text.find('span');
+	$spans.each(function(){
+		this.ofs = $(this).offset();
+	});
+	$spans.each(function(){
+		$(this).css('position', 'absolute');
+		$(this).css(this.ofs);
+		this.ofs = $(this).offset();
+	});
+	return $spans;
+}
+
+function spanWithText($spans, text){
+	var found;
+	$spans.each(function(){
+
+		if($(this).text() === text){
+			found = $(this);
+		}
+	});
+	return found;
+}
+
+function randomColor(){
+	return 'rgb('+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+')';
+}
+
+
+
+
+
+
+$('.app-out-1').css('background-color', randomColor());
+var prevSentence = '';
+var $prevWords = makeWords(prevSentence);
+$prevWords.css('opacity', 1);
+
+//console.log($(prevWords[0]).offset());
+//console.log($(prevWords[1]).offset());
+if(io){
+	debug('io')
+	var socket = io();
+	socket.on('sentence', onResp);
+}else{
+	debug('no-io')
+	setInterval(function(){
+		$.getJSON('/next', onResp);
+	}, 5000)
+}
+
+
+function onResp(resp){
+
+	if(resp && resp.sentence){
+
+		$newWords = makeWords(resp.sentence);
+
+		setTimeout(function(){
+			var prevWorlsOffsets = [];
+			var newWordsWereThere={};
+			$prevWords.each(function(){
+				prevWorlsOffsets.push($(this).offset());
+			});
+			var i=0;
+
+
+			var nextColor = randomColor();
+
+
+			$prevWords.each(function(){
+
+
+				// am i still there ?
+				$newSpan = spanWithText($newWords, $(this).text())
+				if($newSpan){
+				//	console.log($newSpan.offset());
+
+					$(this).animate({
+						top: $newSpan[0].ofs.top,
+						left: $newSpan[0].ofs.left,
+						color: nextColor
+					}, 1000, 'swing');
+					$newSpan[0].isThere = true;
+				}else{
+
+					$(this).fadeTo(1000, 0);
+
+				}
+				i++;
+			});
+
+			i=0;
+			$newWords.css('color',nextColor).each(function(){
+				if(!this.isThere){
+					$(this).fadeTo(1000, 1);
+				}
+				i++;
+			});
+
+			$('.app-out-1').animate({
+				backgroundColor: randomColor()
+			}, 1500 );
+
+			setTimeout(function(){
+
+				$prevWords.parent().remove();
+				$prevWords = $newWords;
+
+				$newWords.css('opacity', 1);
+
+			}, 1200);
+		}, 10);
+
+
+	}
+
+
+	//document.querySelector('#text').innerText = resp.sentence;
+
+
+
+
+	/*if(resp.sentence.split(' ').length===1){
+		flickr.photos.search({
+			text: resp.sentence.split(' ').join('+')
+		}, function(err, result) {
+			if(err) { throw new Error(err); }
+
+			if(result.stat==='ok' && result.photos && result.photos.photo && result.photos.photo.length>0){
+				var src = 'https://farm'+result.photos.photo[0].farm+'.staticflickr.com/'+result.photos.photo[0].server+'/'+result.photos.photo[0].id+'_'+result.photos.photo[0].secret+'.jpg';
+				console.log(src);
+				var img = new Image();
+				img.onload = function(){
+					document.querySelector('#app').style.backgroundImage='url('+src+')';
+				}
+				img.src=src;
+
+
+			}else{
+				console.log('no image');
+			}
+
+		});
+	}*/
+
+
+}
+	</script>
+</body>
+</html>
