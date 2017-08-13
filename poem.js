@@ -245,6 +245,6 @@ app.use(express.static('.'));
 app.get('/next', function(req, res){
 	res.send({sentence:lastArt});
 })
-http.listen(3000, function(){
+http.listen(process.env.PORT || 3000, function(){
   console.log('listening on *:3000');
 });
