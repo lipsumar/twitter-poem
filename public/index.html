@@ -7,67 +7,55 @@
     <title>Twitter Poem</title>
     <link href="https://fonts.googleapis.com/css?family=Martel+Sans:900" rel="stylesheet">
     <style>
-html,body{margin:0;padding:0;height: 100%;}
-.app-out{
-	position: absolute;
-	top:0;
-	left:0;
-	bottom:0;
-	right:0;
-	background-size: cover;
-
-	display:flex;
-	justify-content:center;
-	align-items:center;
-}
-.debug{
-	position: absolute;
-	top:0;
-	left:0;
-	z-index:99999;
-	background: #FFF;
-	width:30%;
-	bottom:0;
-}
-/*.app-out-1 .text{color:green;}*/
-.app{}
-.text{
-	text-align: center;
-	font-size: 18vh;
-    font-family: 'Martel Sans', sans-serif;
-	margin: 1em;
-	padding-top: 4.7vh;
-	color:#FFF;
-	line-height: 1.2;
-	text-shadow:1px 1px 8px rgba(0,0,0,0.4);
-
-}
-.text > span{
-	position: relative;
-
-}
+			html,body{margin:0;padding:0;height: 100%;}
+			.app-out{
+				position: absolute;
+				top:0;
+				left:0;
+				bottom:0;
+				right:0;
+				background-size: cover;
+				display:flex;
+				justify-content:center;
+				align-items:center;
+			}
+			.debug{
+				position: absolute;
+				top:0;
+				left:0;
+				z-index:99999;
+				background: #FFF;
+				width:30%;
+				bottom:0;
+			}
+			.text{
+				text-align: center;
+				font-size: 18vh;
+				font-family: 'Martel Sans', sans-serif;
+				margin: 1em;
+				padding-top: 4.7vh;
+				color:#FFF;
+				line-height: 1.2;
+				text-shadow:1px 1px 8px rgba(0,0,0,0.4);
+			}
+			.text > span{
+				position: relative;
+			}
 	</style>
 </head>
 <body>
-    <!-- <div class="debug"></div> -->
-    <div class="app-out app-out-1">
+  <!-- <div class="debug"></div> -->
+  <div class="app-out app-out-1">
 		<div class="app"></div>
 	</div>
 	<div class="app-out app-out-2">
 		<div class="app"></div>
 	</div>
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 
-    <script src="js/velocity.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-/*
-
-var flickr = new Flickr({
-  api_key: "06e46088e036e2ae2d49075512b55e15"
-});
-/*
-*/
+	<script src="js/velocity.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
 function debug(m){
 	//$('.debug').append('<div>'+m+'</div>')
 }
@@ -110,16 +98,15 @@ function spanWithText($spans, text){
 	});
 	return found;
 }
+
 function componentToHex(c) {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
 }
+
 function randomColor(){
-	//return 'rgb('+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+','+Math.round(Math.random()*255)+')';
     return "#" + componentToHex(Math.round(Math.random()*255)) + componentToHex(Math.round(Math.random()*255)) + componentToHex(Math.round(Math.random()*255));
 }
-
-
 
 
 
@@ -142,19 +129,19 @@ if(io){
 }
 
 function onResp(resp){
-    debug(resp.sentence)
-    onRespOri(resp);
+	debug(resp.sentence)
+	onRespOri(resp);
 }
 
 function onRespOri(resp){
 
 	if(resp && resp.sentence){
 
-        if(resp.sentence.split(' ').length===1){
-            setTimeout(function(){
-                $('.app-out-1').velocity({'background-color': randomColor()}, 1500);
-            }, 1200);
-        }
+		if(resp.sentence.split(' ').length===1){
+				setTimeout(function(){
+					$('.app-out-1').velocity({'background-color': randomColor()}, 1500);
+				}, 1200);
+		}
 
 		$newWords = makeWords(resp.sentence);
 
@@ -176,8 +163,6 @@ function onRespOri(resp){
 				// am i still there ?
 				$newSpan = spanWithText($newWords, $(this).text())
 				if($newSpan){
-				//	console.log($newSpan.offset());
-
 					$(this).velocity({
 						top: $newSpan[0].ofs.top,
 						left: $newSpan[0].ofs.left,
@@ -185,15 +170,12 @@ function onRespOri(resp){
 					}, 1000, 'swing');
 					$newSpan[0].isThere = true;
 				}else{
-
 					$(this).fadeTo(1000, 0);
-
 				}
 				i++;
 			});
 
 			i=0;
-			//$newWords.css('color',nextColor).each(function(){
 			$newWords.each(function(){
 				if(!this.isThere){
 					$(this).fadeTo(1000, 1);
@@ -201,53 +183,13 @@ function onRespOri(resp){
 				i++;
 			});
 
-			/*$('.app-out-1').velocity({
-				backgroundColor: randomColor()
-			}, 1500 );*/
-
 			setTimeout(function(){
-
 				$prevWords.parent().remove();
 				$prevWords = $newWords;
-
 				$newWords.css('opacity', 1);
-
 			}, 1200);
 		}, 10);
-
-
 	}
-
-
-	//document.querySelector('#text').innerText = resp.sentence;
-
-
-
-
-	/*if(resp.sentence.split(' ').length===1){
-		flickr.photos.search({
-			text: resp.sentence.split(' ').join('+')
-		}, function(err, result) {
-			if(err) { throw new Error(err); }
-
-			if(result.stat==='ok' && result.photos && result.photos.photo && result.photos.photo.length>0){
-				var src = 'https://farm'+result.photos.photo[0].farm+'.staticflickr.com/'+result.photos.photo[0].server+'/'+result.photos.photo[0].id+'_'+result.photos.photo[0].secret+'.jpg';
-				console.log(src);
-				var img = new Image();
-				img.onload = function(){
-					document.querySelector('#app').style.backgroundImage='url('+src+')';
-				}
-				img.src=src;
-
-
-			}else{
-				console.log('no image');
-			}
-
-		});
-	}*/
-
-
 }
 </script>
 </body>
