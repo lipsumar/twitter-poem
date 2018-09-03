@@ -50,7 +50,7 @@ function connect() {
 
 function waitAndReconnect(err) {
     console.log('>>>>> error/close/end')
-    console.log(err)
+    console.log(err.message)
     console.log('Reconnecting in 10s...')
     setTimeout(connect, 10 * 1000);
 }
@@ -113,7 +113,7 @@ function tick() {
         updateSentence()
     } catch (err) {
         console.log('!!!!!!!!!!!! Error')
-        console.log(err)
+        console.log(err.message)
     }
 
     setTimeout(tick, 4000);
