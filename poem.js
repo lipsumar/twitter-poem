@@ -21,6 +21,7 @@ var realWords = require('fs').readFileSync('./dico-stem-twitter.txt', {
     }, {});
 
 
+console.log('Twitter consumer key:', process.env.TWITTER_CONSUMER_KEY)
 var client = new Twitter({
     "consumer_key": process.env.TWITTER_CONSUMER_KEY,
     "consumer_secret": process.env.TWITTER_CONSUMER_SECRET,
